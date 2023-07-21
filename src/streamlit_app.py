@@ -51,7 +51,6 @@ def main():
 
         # 列のカラム名を取得
         column_names = df.columns.tolist()
-
         # 列を選択するドロップダウンメニューを表示
         selected_column = st.selectbox("列を選択してください", column_names)
 
@@ -76,6 +75,37 @@ def main():
         except ValueError as e:
             # 数値に変換できなかった場合はエラーメッセージを表示
             st.write(f"エラー：{e}")
+
+        # 列を2つ選択するドロップダウンメニューを表示
+        selected_columns = st.multiselect("## 列を2つ選択してください", column_names)
+
+        if len(selected_columns) == 2:
+            try:
+                # 選択した2つの列の要素が数値の場合には散布図を表示
+                if (
+                    not df[selected_columns]
+                    .apply(lambda x: isinstance(x, str))
+                    .any()
+                    .any()
+                ):
+                    st.subheader("散布図")
+                    fig, ax = plt.subplots()
+                    sns.scatterplot(
+                        data=df, x=selected_columns[0], y=selected_columns[1], ax=ax
+                    )
+                    st.pyplot(fig)
+                    # 選択した2つの列の相関係数を計算し、表示
+                    st.subheader("相関係数")
+                    correlation_coefficient = df[selected_columns].corr().iloc[0, 1]
+                    st.write(
+                        f"{selected_columns[0]} と {selected_columns[1]} の相関係数：{correlation_coefficient}"
+                    )
+                else:
+                    st.write("選択した列の要素は数値ではありません。数値の列を2つ選択してください。")
+            except ValueError:
+                st.warning("数値データではありません")
+        else:
+            st.write("2つの列を選択してください。")
 
 
 if __name__ == "__main__":
